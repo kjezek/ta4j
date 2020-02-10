@@ -118,10 +118,6 @@ public class KAMAIndicatorTest extends AbstractIndicatorTest<Indicator<Num>, Num
         assertEquals(5000, series.getBarCount());
 
         KAMAIndicator kama = new KAMAIndicator(new ClosePriceIndicator(series), 10, 2, 30);
-        try {
-            assertNumEquals("2999.75", kama.getValue(3000));
-        } catch (Throwable t) {
-            fail(t.getMessage());
-        }
+        assertNumEquals("2999.75", kama.getValue(3000));
     }
 }

@@ -79,7 +79,6 @@ public abstract class CachedIndicator<T> extends AbstractIndicator<T> {
         final BarSeries series = getBarSeries();
         final int removedBarsCount = series.getRemovedBarsCount();
         final int maximumResultCount = series.getMaximumBarCount();
-        final int removedIndexes = series.getRemovedBarsCount();
 
         T t;
         if (index == series.getEndIndex()) {
@@ -88,7 +87,7 @@ public abstract class CachedIndicator<T> extends AbstractIndicator<T> {
         } else {
 
             // when the index is from non-existing range,
-            // first element is used - his is from orig ta4j, it is obscure trick to prevent recursion
+            // first element is used - this is from orig ta4j, it is obscure trick to prevent recursion
             // https://github.com/mdeverdelhan/ta4j/issues/120
             final int efIndex;
             if (index < removedBarsCount) {
@@ -103,13 +102,14 @@ public abstract class CachedIndicator<T> extends AbstractIndicator<T> {
             if (t == null) {
                 t = calculate(efIndex);
                 results.put(efIndex, t);
+                highestResultIndex = Math.max(Math.max(removedBarsCount, index), highestResultIndex);
             }
         }
 
         // remove unused indexes only once in a while, not for every getValue
         if (results.size() * 10 > maximumResultCount) {
-            IntStream.range(lastDeleted, removedIndexes).forEach(results::remove);
-            lastDeleted = removedIndexes;
+            IntStream.range(lastDeleted, removedBarsCount).forEach(results::remove);
+            lastDeleted = removedBarsCount;
         }
 
         return t;

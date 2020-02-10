@@ -66,21 +66,34 @@ public abstract class RecursiveCachedIndicator<T> extends CachedIndicator<T> {
     public T getValue(int index) {
         BarSeries series = getBarSeries();
         if (series != null) {
-            final int seriesEndIndex = series.getEndIndex();
-            if (index <= seriesEndIndex) {
-                // We are not after the end of the series
-                final int removedBarsCount = series.getRemovedBarsCount();
-                int startIndex = Math.max(removedBarsCount, highestResultIndex);
-                if (index - startIndex > RECURSION_THRESHOLD) {
-                    // Too many uncalculated values; the risk for a StackOverflowError becomes high.
-                    // Calculating the previous values iteratively
-                    for (int prevIdx = startIndex; prevIdx < index; prevIdx++) {
-                        super.getValue(prevIdx);
-                    }
-                }
-            }
+            checkIterateNeeded(series, index);
         }
 
         return super.getValue(index);
     }
+
+    private void checkIterateNeeded(BarSeries series, int index) {
+        final int seriesEndIndex = series.getEndIndex();
+        if (index <= seriesEndIndex) {
+            // We are not after the end of the series
+            iterateInterval(series, index);
+        }
+    }
+
+    private void iterateInterval(BarSeries series, int index) {
+        final int removedBarsCount = series.getRemovedBarsCount();
+        int startIndex = Math.max(removedBarsCount, highestResultIndex);
+        iterativeGetValue(startIndex, index);
+    }
+
+    private void iterativeGetValue(int startIndex, int index) {
+        if (index - startIndex > RECURSION_THRESHOLD) {
+            // Too many uncalculated values; the risk for a StackOverflowError becomes high.
+            // Calculating the previous values iteratively
+            for (int prevIdx = startIndex; prevIdx < index; prevIdx++) {
+                super.getValue(prevIdx);
+            }
+        }
+    }
+
 }
