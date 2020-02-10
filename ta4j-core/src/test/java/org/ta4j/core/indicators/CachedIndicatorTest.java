@@ -157,11 +157,7 @@ public class CachedIndicatorTest extends AbstractIndicatorTest<Indicator<Num>, N
         assertEquals(5, series.getBarCount());
 
         ZLEMAIndicator zlema = new ZLEMAIndicator(new ClosePriceIndicator(series), 1);
-        try {
-            assertNumEquals(4996, zlema.getValue(8));
-        } catch (Throwable t) {
-            fail(t.getMessage());
-        }
+        assertNumEquals(4996, zlema.getValue(8));
     }
 
     @Test
